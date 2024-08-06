@@ -25,6 +25,7 @@ or package, that can contain all used modules too.
 # Note: This avoids imports at all costs, such that initial startup doesn't do more
 # than necessary, until re-execution has been decided.
 
+import ast
 import os
 import sys
 
@@ -41,8 +42,8 @@ def main():
 
     if "NUITKA_PYTHONPATH" in os.environ:
         # Restore the PYTHONPATH gained from the site module, that we chose not
-        # to have imported. pylint: disable=eval-used
-        sys.path = eval(os.environ["NUITKA_PYTHONPATH"])
+        # to have imported during compilation.
+        sys.path = ast.literal_eval(os.environ["NUITKA_PYTHONPATH"])
         del os.environ["NUITKA_PYTHONPATH"]
     else:
         # Remove path element added for being called via "__main__.py", this can
@@ -101,20 +102,17 @@ def main():
 
     if "NUITKA_NAMESPACES" in os.environ:
         # Restore the detected name space packages, that were force loaded in
-        # site.py, and will need a free pass later on. pylint: disable=eval-used
-
+        # site.py, and will need a free pass later on
         from nuitka.importing.PreloadedPackages import setPreloadedPackagePaths
 
-        setPreloadedPackagePaths(eval(os.environ["NUITKA_NAMESPACES"]))
+        setPreloadedPackagePaths(ast.literal_eval(os.environ["NUITKA_NAMESPACES"]))
         del os.environ["NUITKA_NAMESPACES"]
 
     if "NUITKA_PTH_IMPORTED" in os.environ:
         # Restore the packages that the ".pth" files asked to import.
-        # pylint: disable=eval-used
-
         from nuitka.importing.PreloadedPackages import setPthImportedPackages
 
-        setPthImportedPackages(eval(os.environ["NUITKA_PTH_IMPORTED"]))
+        setPthImportedPackages(ast.literal_eval(os.environ["NUITKA_PTH_IMPORTED"]))
         del os.environ["NUITKA_PTH_IMPORTED"]
 
     # Now the real main program of Nuitka can take over.
